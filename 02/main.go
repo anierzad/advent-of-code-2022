@@ -12,57 +12,63 @@ var (
 		'A': 1,
 		'B': 2,
 		'C': 3,
-		'X': 1,
-		'Y': 2,
-		'Z': 3,
+	}
+
+	RESULT = map[rune]int{
+		'X': -1,
+		'Y': 0,
+		'Z': 1,
 	}
 )
 
 type Game struct {
 	Opposition rune
-	Player rune
+	Result rune
 }
 
 func (g Game) Score() int {
 
-	total := SCORES[g.Player]
+	total := SCORES[g.player()]
 
-	if g.outcome() == 0 {
+	if RESULT[g.Result] == 0 {
 		total = total + 3
 	}
 
-	if g.outcome() == 1 {
+	if RESULT[g.Result] == 1 {
 		total = total + 6
 	}
 
 	return total
 }
 
-func (g Game) outcome() int {
+func (g Game) player() rune {
 
-	if SCORES[g.Player] == SCORES[g.Opposition] {
-		return 0
+	if RESULT[g.Result] == -1 {
+		player := g.Opposition - 1
+
+		if player < 'A' {
+			player = 'C'
+		}
+		return player
 	}
 
-	if SCORES[g.Player] == SCORES['Z'] && SCORES[g.Opposition] == SCORES['A'] {
-		return -1
+	if RESULT[g.Result] == 1 {
+		player := g.Opposition + 1
+
+		if player > 'C' {
+			player = 'A'
+		}
+		return player
 	}
 
-	if SCORES[g.Player] == SCORES['X'] && SCORES[g.Opposition] == SCORES['C'] {
-		return 1
-	}
-
-	if SCORES[g.Player] > SCORES[g.Opposition] {
-		return 1
-	}
-
-	return -1
+	return g.Opposition
 }
 
-func NewGame(opposition, player rune) Game {
+
+func NewGame(opposition, result rune) Game {
 	return Game{
 		Opposition: opposition,
-		Player: player,
+		Result: result,
 	}
 }
 
