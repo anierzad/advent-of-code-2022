@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -64,13 +65,34 @@ func main() {
 		elf.AddMeal(mealCals)
 	}
 
-	var elfMost *Elf
+	elvesMost := make([]*Elf, 0)
 
 	for _, elf := range elves {
-		if elfMost == nil || elfMost.Calories() < elf.Calories() {
-			elfMost = elf
+
+		// Add if slice not full.
+		if len(elvesMost) < 3 {
+			elvesMost = append(elvesMost, elf)
+			continue
+		}
+
+		// Compare.
+		for _, elfMost := range elvesMost {
+			if elfMost.Calories() < elf.Calories() {
+
+				elvesMost = append(elvesMost, elf)
+				sort.Slice(elvesMost, func(i, j int) bool {
+					return elvesMost[i].Calories() < elvesMost[j].Calories()
+				})
+				elvesMost = elvesMost[1:]
+				break
+			}
 		}
 	}
 
-	fmt.Printf("Most calories: %d\n", elfMost.Calories())
+	total := 0
+	for _, e := range elvesMost {
+		total = total + e.Calories()
+	}
+
+	fmt.Printf("Total of 3 elves with most calories: %d\n", total)
 }
