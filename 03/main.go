@@ -8,15 +8,15 @@ import (
 )
 
 type Rucksack struct {
-	first  map[rune]int
-	second map[rune]int
+	First    map[rune]int
+	Second   map[rune]int
 }
 
 func (r Rucksack) InBoth() []rune {
 	both := make([]rune, 0)
 
-	for k := range r.first {
-		_, e := r.second[k]
+	for k := range r.First {
+		_, e := r.Second[k]
 		if e {
 			both = append(both, k)
 		}
@@ -47,8 +47,8 @@ func NewRucksack(contents string) Rucksack {
 	}
 
 	return Rucksack{
-		first:  first,
-		second: second,
+		First:    first,
+		Second:   second,
 	}
 }
 
@@ -67,6 +67,34 @@ func itemPriority(item rune) int {
 	return priority
 }
 
+func findCommon(rucksacks []Rucksack) rune {
+	rucksackTally := make(map[rune]int)
+
+	for _, r := range rucksacks {
+		contents := make(map[rune]bool)
+		for k := range r.First {
+			contents[k] = true
+		}
+		for k := range r.Second {
+			contents[k] = true
+		}
+
+		for k := range contents {
+			val, exists := rucksackTally[k]
+			if !exists {
+				rucksackTally[k] = 0
+			}
+			rucksackTally[k] = val + 1
+
+			if rucksackTally[k] == 3 {
+				return k
+			}
+		}
+	}
+
+	return '!'
+}
+
 func main() {
 
 	f, err := os.Open("./input")
@@ -79,13 +107,19 @@ func main() {
 	scanner := bufio.NewScanner(f)
 
 	total := 0
+	group := make([]Rucksack, 0)
 	for scanner.Scan() {
 		line := scanner.Text()
-		rucksack := NewRucksack(line)
+		group = append(group, NewRucksack(line))
 
-		for _, r := range rucksack.InBoth() {
-			total = total + itemPriority(r)
+		if len(group) < 3 {
+			continue
 		}
+
+		badge := findCommon(group)
+		total = total + itemPriority(badge)
+
+		group = make([]Rucksack, 0)
 	}
 
 	fmt.Println("Total:", total)
