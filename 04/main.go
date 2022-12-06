@@ -36,7 +36,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		if (bMin >= aMin && bMax <= aMax) || (aMin >= bMin && aMax <= bMax) {
+		if aMin <= bMax && aMax >= bMin {
 			total++
 		}
 	}
