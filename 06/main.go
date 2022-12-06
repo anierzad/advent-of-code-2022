@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	MARKER_LENGTH = 4
+	MARKER_LENGTH = 14
 )
 
 func main() {
