@@ -12,14 +12,14 @@ import (
 
 type Stack []rune
 
-func (s *Stack) Pop() rune {
-	top := (*s)[len(*s)-1]
-	*s = (*s)[:len(*s)-1]
+func (s *Stack) Pop(count int) []rune {
+	top := (*s)[len(*s)-count:len(*s)]
+	*s = (*s)[:len(*s)-count]
 	return top
 }
 
-func (s *Stack) Push(r rune) {
-	*s = append((*s), r)
+func (s *Stack) Push(r []rune) {
+	*s = append((*s), r...)
 }
 
 func (s Stack) Print() {
@@ -72,7 +72,7 @@ func main() {
 
 		for r, p := range stackPos {
 			if l[p] != ' ' {
-				stacks[r].Push(rune(l[p]))
+				stacks[r].Push([]rune{rune(l[p])})
 			}
 		}
 	}
@@ -89,10 +89,8 @@ func main() {
 		source := rune(res[2][0])
 		destination := rune(res[3][0])
 
-		for i := 0; i < count; i++ {
-			t := stacks[source].Pop()
-			stacks[destination].Push(t)
-		}
+		t := stacks[source].Pop(count)
+		stacks[destination].Push(t)
 	}
 
 	stackIds := make([]rune, 0)
