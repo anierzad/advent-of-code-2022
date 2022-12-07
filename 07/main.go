@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+const (
+	MAX_SPACE = 70000000
+	UPDATE_SPACE = 30000000
+)
+
 type Node struct {
 	Name     string
 	Contents map[string]*Node
@@ -126,13 +131,18 @@ func main() {
 
 	allDirs := root.AllDirectories()
 
-	total := 0
+	usedSpace := root.Size()
+	available := MAX_SPACE - usedSpace
+	required := UPDATE_SPACE - available
+
+	best := MAX_SPACE
+
 	for _, dir := range allDirs {
 		size := dir.Size()
-		if size <= 100000 {
-			total = total + size
+		if size > required && size < best {
+			best = size
 		}
 	}
 
-	fmt.Println("Total:", total)
+	fmt.Println("Smallest dir that's big enough:", best)
 }
