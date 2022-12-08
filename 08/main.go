@@ -24,75 +24,94 @@ type Tree struct {
 	Height   int
 }
 
-func (t *Tree) Visible(forest Forest) bool {
-
-	// Check north.
-	visN := true
+func (t *Tree) viewNorth(forest Forest) (distance int, blocked bool) {
 	for y := t.Position.Y-1;; y-- {
 		p := NewPoint(t.Position.X, y)
 
 		ct, exists := forest[p]
-		if exists {
-
-			if ct.Height >= t.Height {
-				visN = false
-				break
-			}
-			continue
+		if !exists {
+			break
 		}
-		break
+
+		distance++
+		if ct.Height >= t.Height {
+			return distance, true
+		}
 	}
 
-	// Check east.
-	visE := true
+	return distance, false
+}
+
+func (t *Tree) viewEast(forest Forest) (distance int, blocked bool) {
 	for x := t.Position.X+1;; x++ {
 		p := NewPoint(x, t.Position.Y)
 
 		ct, exists := forest[p]
-		if exists {
-
-			if ct.Height >= t.Height {
-				visE = false
-				break
-			}
-			continue
+		if !exists {
+			break
 		}
-		break
+
+		distance++
+		if ct.Height >= t.Height {
+			return distance, true
+		}
 	}
 
-	// Check south.
-	visS := true
+	return distance, false
+}
+
+func (t *Tree) viewSouth(forest Forest) (distance int, blocked bool) {
 	for y := t.Position.Y+1;; y++ {
 		p := NewPoint(t.Position.X, y)
 
 		ct, exists := forest[p]
-		if exists {
-			if ct.Height >= t.Height {
-				visS = false
-				break
-			}
-			continue
+		if !exists {
+			break
 		}
-		break
+
+		distance++
+		if ct.Height >= t.Height {
+			return distance, true
+		}
 	}
 
-	// Check west.
-	visW := true
+	return distance, false
+}
+
+func (t *Tree) viewWest(forest Forest) (distance int, blocked bool) {
 	for x := t.Position.X-1;; x-- {
 		p := NewPoint(x, t.Position.Y)
 
 		ct, exists := forest[p]
-		if exists {
-			if ct.Height >= t.Height {
-				visW = false
-				break
-			}
-			continue
+		if !exists {
+			break
 		}
-		break
+
+		distance++
+		if ct.Height >= t.Height {
+			return distance, true
+		}
 	}
 
-	return visN || visE || visS || visW
+	return distance, false
+}
+
+func (t *Tree) Visible(forest Forest) bool {
+	_, visN := t.viewNorth(forest)
+	_, visE := t.viewEast(forest)
+	_, visS := t.viewSouth(forest)
+	_, visW := t.viewWest(forest)
+
+	return !visN || !visE || !visS || !visW
+}
+
+func (t *Tree) ScenicScore(forest Forest) int {
+	visN, _ := t.viewNorth(forest)
+	visE, _ := t.viewEast(forest)
+	visS, _ := t.viewSouth(forest)
+	visW, _ := t.viewWest(forest)
+
+	return visN * visE * visS * visW
 }
 
 type Forest map[Point]Tree
@@ -168,4 +187,14 @@ func main() {
 	forest.PrintVis()
 
 	fmt.Println("Visible trees:", total)
+
+	best := 0
+	for _, t := range forest {
+		score := t.ScenicScore(forest)
+		if score > best {
+			best = score
+		}
+	}
+
+	fmt.Println("Best scenic score:", best)
 }
