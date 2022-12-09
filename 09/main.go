@@ -10,6 +10,10 @@ import (
 	"math"
 )
 
+const (
+	ROPE_LENGTH = 10
+)
+
 type Point struct {
 	X, Y int
 }
@@ -30,7 +34,6 @@ func NewPoint(x, y int) Point {
 type Node struct {
 	Symbol   rune
 	Position Point
-	Previous Point
 	child    *Node
 	Visited  map[Point]bool
 }
@@ -40,8 +43,6 @@ func (n *Node) Attach(child *Node) {
 }
 
 func (n *Node) Move(direction rune) {
-
-	n.Previous = n.Position
 
 	switch direction {
 	case 'U':
@@ -62,14 +63,47 @@ func (n *Node) Move(direction rune) {
 }
 
 func (n *Node) Follow(parent *Node) {
-	if !n.Position.Touches(parent.Position) {
-		n.Position = parent.Previous
+	if n.doFollow(parent) {
 		n.Visited[n.Position] = true
+
+		if n.child != nil {
+			n.child.Follow(n)
+		}
 	}
 }
 
-func NewNode(symbol rune) Node {
-	return Node{
+func (n *Node) doFollow(parent *Node) bool {
+
+	if n.Position.Touches(parent.Position) {
+		return false
+	}
+
+	xDiff := parent.Position.X - n.Position.X
+	yDiff := parent.Position.Y - n.Position.Y
+
+	if xDiff != 0 {
+		if xDiff > 0 {
+			xDiff = 1
+		} else {
+			xDiff = -1
+		}
+	}
+
+	if yDiff != 0 {
+		if yDiff > 0 {
+			yDiff = 1
+		} else {
+			yDiff = -1
+		}
+	}
+
+	n.Position.X = n.Position.X + xDiff
+	n.Position.Y = n.Position.Y + yDiff
+	return true
+}
+
+func NewNode(symbol rune) *Node {
+	return &Node{
 		Symbol: symbol,
 		Visited: map[Point]bool{
 			NewPoint(0, 0): true,
@@ -85,9 +119,19 @@ func main() {
 	}
 	defer f.Close()
 
-	head := NewNode('H')
-	tail := NewNode('T')
-	head.Attach(&tail)
+	knots := make([]*Node, ROPE_LENGTH)
+
+	for i := 0; i < ROPE_LENGTH; i++ {
+		if i == 0 {
+			knots[i] = NewNode('H')
+			continue
+		}
+		knots[i] = NewNode(rune(strconv.Itoa(i)[0]))
+		knots[i-1].Attach(knots[i])
+	}
+
+	head := knots[0]
+	tail := knots[len(knots)-1]
 
 	scanner := bufio.NewScanner(f)
 
