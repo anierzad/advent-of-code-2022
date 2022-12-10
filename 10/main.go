@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+const (
+	CRT_WIDTH = 40
+)
+
 type Operation struct {
 	ExecTime int
 	Action   func(reg int, args []string) int
@@ -48,7 +52,6 @@ func main() {
 
 	xReg := 1
 	cycle := 0
-	signals := make([]int, 0)
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
@@ -57,19 +60,24 @@ func main() {
 
 		for c := 0; c < op.ExecTime; c++ {
 			cycle++
+			position := (cycle - 1) % CRT_WIDTH
+			symbol := '.'
 
-			if (cycle - 20) % 40 == 0 {
-				signals = append(signals, xReg * cycle)
+			// fmt.Println(cycle, position)
+
+			if position == 0 {
+				fmt.Println()
+				fmt.Printf("Cycle %3d -> ", cycle)
 			}
+
+			if position >= xReg - 1 && position <= xReg + 1 {
+				symbol = '#'
+			}
+
+			fmt.Print(string(symbol))
 		}
 
 		xReg = op.Action(xReg, args)
 	}
-
-	total := 0
-	for _, s := range signals {
-		total = total + s
-	}
-
-	fmt.Println("Total signal strength:", total)
+	fmt.Println()
 }
